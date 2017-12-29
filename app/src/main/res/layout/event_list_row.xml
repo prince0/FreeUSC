@@ -2,7 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/holo_orange_light"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground"
     android:padding="@dimen/size_10">
 
     <TextView
@@ -39,5 +41,11 @@
         android:layout_alignBaseline="@+id/text_view_event_timing"
         android:layout_alignParentRight="true"
         android:text="Distance" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+
+        android:layout_below="@+id/text_view_distance"/>
 
 </RelativeLayout>

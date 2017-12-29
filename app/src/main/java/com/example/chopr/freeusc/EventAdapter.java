@@ -38,7 +38,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.MyViewHolder
 
         holder.eventName.setText(eventDetail.getEventName());
         holder.eventLocation.setText(eventDetail.getLocationName());
-        holder.eventDate.setText(eventDetail.getDate().toString());
+        holder.eventDate.setText(eventDetail.getDate());
+        holder.eventTiming.setText(eventDetail.getTime());
         holder.eventDistance.setText("0.12 miles");
 //        holder.eventTiming.setText("0.12 miles");
 
@@ -46,7 +47,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.MyViewHolder
 
     @Override
     public int getItemCount() {
-        return eventList.size();
+        if (eventList != null)
+            return eventList.size();
+        else
+            return 0;
     }
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
