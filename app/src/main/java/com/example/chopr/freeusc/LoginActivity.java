@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -17,12 +18,20 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.POST;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -42,9 +51,16 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
+        final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://www.lafeimme.com/FreeUSC/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        final FreeUSCService freeUSCService = retrofit.create(FreeUSCService.class);
+
         callbackManager = CallbackManager.Factory.create();
 
-        loginButton.setReadPermissions("email, birthday");
+        loginButton.setReadPermissions("email");
 
         LoginManager.getInstance().logInWithPublishPermissions(
                 this,
@@ -55,10 +71,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
 
-                Profile profile = Profile.getCurrentProfile();
+                final Profile profile = Profile.getCurrentProfile();
 
-                String firstName = profile.getFirstName();
-                String lastName = profile.getLastName();
+                final String firstName = profile.getFirstName();
+                final String lastName = profile.getLastName();
 
                 GraphRequest request = GraphRequest.newMeRequest(
                         loginResult.getAccessToken(),
@@ -66,7 +82,15 @@ public class LoginActivity extends AppCompatActivity {
 
                             @Override
                             public void onCompleted(JSONObject object, GraphResponse response) {
-                                Log.v("LoginActivity", object.toString());
+
+                                try {
+//                                    User user = new User(firstName, lastName, object.get("email").toString(), object.get("gender").toString());
+                                    freeUSCService.createUser(firstName, lastName,
+                                            object.get("email").toString(), object.get("gender").toString());
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
 
                             }
                         });
@@ -76,19 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                 request.setParameters(parameters);
                 request.executeAsync();
 
-//                            profileTracker = new ProfileTracker() {
-//                    @Override
-//                    protected void onCurrentProfileChanged(
-//                            Profile oldProfile,
-//                            Profile currentProfile) {
-//
-//                        Log.e("first name",currentProfile.getFirstName());
-//                        Log.e("last name",currentProfile.getLastName());
-//
-//                        currentProfile.
-//
-//                    }
-//                };
+                openActivity();
 
                 Log.e("Facebook result", loginResult.getRecentlyGrantedPermissions().toString());
             }
@@ -103,6 +115,11 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    void openActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
     @Override
